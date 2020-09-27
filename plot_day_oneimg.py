@@ -4,6 +4,7 @@ from netCDF4 import Dataset
 import numpy as np
 import os
 import glob
+
 "读取一个文件夹的n个netCDF文件并可视化，最后图像为n条轨道上的数据"
 
 
@@ -19,7 +20,7 @@ def read_ncfile_value(fh, value):
 fig = plt.figure(figsize=(16, 12))
 # read all netCDF file
 dir_path = 'E:\python_workfile\\remote_sensing\H2B_nc_data\H2B_20200711'
-ncfiles = glob.glob(dir_path+'\*.nc')
+ncfiles = glob.glob(dir_path + '\*.nc')
 lon_array = np.array([])
 lat_array = np.array([])
 swhc_array = np.array([])
@@ -36,8 +37,8 @@ for ncfile in ncfiles:
     swhc_mask_array = np.append(swhc_mask_array, swhc_mask)
     fh.close()
 
-#m = Basemap(projection='cyl', llcrnrlat=-90, urcrnrlat=90, llcrnrlon=0, urcrnrlon=360, resolution='c')
-m = Basemap(projection='npaeqd', boundinglat=60, lon_0=180,resolution='c')
+m = Basemap(projection='cyl', llcrnrlat=-90, urcrnrlat=90, llcrnrlon=0, urcrnrlon=360, resolution='c')
+# m = Basemap(projection='npaeqd', boundinglat=60, lon_0=180, resolution='c')
 x, y = m(lon_array, lat_array)
 
 # Draw the scatterplot
@@ -50,6 +51,7 @@ m.drawmapboundary()
 m.drawparallels(np.arange(-90., 120., 30.), labels=[1, 0, 0, 0])
 m.drawmeridians(np.arange(-180., 180., 60.), labels=[0, 0, 0, 1])
 
-#plt.show()
+# 测试宿舍电脑上传
+plt.show()
 # 存储图像
-plt.savefig(fname=dir_path+'\\jpg\\20200711_swh_c_npaeqd.jpg')
+# plt.savefig(fname=dir_path+'\\jpg\\20200711_swh_c_npaeqd.jpg')
