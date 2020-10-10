@@ -38,20 +38,20 @@ for ncfile in ncfiles:
     fh.close()
 
 m = Basemap(projection='cyl', llcrnrlat=-90, urcrnrlat=90, llcrnrlon=0, urcrnrlon=360, resolution='c')
-# m = Basemap(projection='npaeqd', boundinglat=60, lon_0=180, resolution='c')
+#m = Basemap(projection='npaeqd', boundinglat=60, lon_0=180, resolution='c')
 x, y = m(lon_array, lat_array)
 
 # Draw the scatterplot
 swhc_array_masked = np.ma.array(swhc_array, mask=swhc_mask_array)
-m.scatter(x, y, c=swhc_array_masked, marker='o', cmap=plt.cm.jet, alpha=0.8)
+h = m.scatter(x, y, c=swhc_array_masked, marker='o', cmap=plt.cm.jet, alpha=0.8)
 m.colorbar(location='right')
 m.drawcoastlines()
 m.fillcontinents()
 m.drawmapboundary()
 m.drawparallels(np.arange(-90., 120., 30.), labels=[1, 0, 0, 0])
-m.drawmeridians(np.arange(-180., 180., 60.), labels=[0, 0, 0, 1])
-
+m.drawmeridians(np.arange(-180., 180., 30.), labels=[0, 0, 0, 1])
+plt.cm.ScalarMappable.set_clim(h, vmin=0, vmax=10)
 # 测试宿舍电脑上传
-plt.show()
+#plt.show()
 # 存储图像
-# plt.savefig(fname=dir_path+'\\jpg\\20200711_swh_c_npaeqd.jpg')
+plt.savefig(fname=dir_path+'\\jpg\\20200711_swh_c_cyl.jpg')

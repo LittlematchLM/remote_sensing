@@ -16,9 +16,9 @@ def read_ncfile_value(fh, value):
     return lons, lats, value
 
 
-fig = plt.figure()
+fig = plt.figure(figsize=(16, 12))
 # read all netCDF file
-dir_path = 'E:\python_workfile\\remote_sensing\H2B_nc_data\H2B_20200611'
+dir_path = 'E:\python_workfile\\remote_sensing\H2B_nc_data\H2B_20200711'
 ncfiles = os.listdir(dir_path)
 for ncfile in ncfiles:
     fh = Dataset(dir_path + '\\' + ncfile, mode='r')
@@ -34,7 +34,7 @@ for ncfile in ncfiles:
     x, y = m(lons, lats)
 
     # Draw the scatterplot
-    m.scatter(x, y, c=swhc, marker='.', cmap=plt.cm.jet, alpha=0.8)
+    h = m.scatter(x, y, c=swhc, marker='.', cmap=plt.cm.jet, alpha=0.8)
     m.colorbar(location='right')
     m.drawcoastlines()
     m.fillcontinents()
@@ -42,5 +42,6 @@ for ncfile in ncfiles:
     m.drawparallels(np.arange(-90., 120., 30.), labels=[1, 0, 0, 0])
     m.drawmeridians(np.arange(-180., 180., 60.), labels=[0, 0, 0, 1])
 
-    plt.savefig(dir_path+'\\'+ncfile.split('.')[0]+'.jpg')
+    plt.cm.ScalarMappable.set_clim(h, vmin=0, vmax=10)
+    plt.savefig(dir_path + '\\jpg\\' + ncfile.split('.')[0].split('\\')[-1] + '.jpg')
     plt.close()

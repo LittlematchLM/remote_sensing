@@ -2,6 +2,7 @@ from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 from netCDF4 import Dataset
 import numpy as np
+from matplotlib import cm, colors
 
 "读取单个netCDF文件并可视化，最后图像为一条轨道上的数据"
 
@@ -22,8 +23,9 @@ lat_mean = lats.mean()
 m = Basemap(projection='cyl', llcrnrlat=-90, urcrnrlat=90, llcrnrlon=0, urcrnrlon=360, resolution='c')
 x, y = m(lons, lats)
 # Draw the scatterplot
-m.scatter(x, y, c=swhc, marker='.', cmap=plt.cm.jet, alpha=0.8)
+h = m.scatter(x, y, c=swhc, marker='.',cmap=plt.cm.jet, alpha=0.8)
 m.colorbar(location='right')
+plt.cm.ScalarMappable.set_clim(h, vmin=0, )
 
 m.drawcoastlines()
 m.fillcontinents()
