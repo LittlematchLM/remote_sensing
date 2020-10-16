@@ -52,6 +52,6 @@ m.drawparallels(np.arange(-90., 120., 30.), labels=[1, 0, 0, 0])
 m.drawmeridians(np.arange(-180., 180., 30.), labels=[0, 0, 0, 1])
 plt.cm.ScalarMappable.set_clim(h, vmin=0, vmax=10)
 # 测试宿舍电脑上传
-#plt.show()
+plt.show()
 # 存储图像
-plt.savefig(fname=dir_path+'\\jpg\\20200711_swh_c_cyl.jpg')
+#plt.savefig(fname=dir_path+'\\jpg\\20200711_swh_c_cyl.jpg')
