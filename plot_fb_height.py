@@ -2,33 +2,36 @@ from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 import numpy as np
 import h5py
-from matplotlib import cm, colors
+import glob
 
 "读取单个h5文件并可视化,最后图像为一条轨道上的数据"
 
 fig = plt.figure(figsize=(16, 12))
 # read netCDF file
-my_h5file = 'E:\python_workfile\\remote_sensing\\H2B_nc_data\\ICESAT2_20200711\\ATL10-01_20200710235929_02390801_003_01.h5'
+dir_path = '.\H2B_nc_data\ICESAT2_ATL12_20200711'
+ncfiles = glob.glob(dir_path + '\*.h5')
+lon_array = np.array([])
+lat_array = np.array([])
+swh_array = np.array([])
+for ncfile in ncfiles:
+    with h5py.File(ncfile, 'r') as f:
+        lats = f['gt2l']['ssh_segments']['latitude'][:]
+        lons = f['gt2l']['ssh_segments']['longitude'][:]
+        swh = f['gt2l']['ssh_segments']['heights']['swh'][:]
+    lon_array = np.append(lon_array, lons)
+    lat_array = np.append(lat_array, lats)
+    swh_array = np.append(swh_array, swh)
 
-f = h5py.File(my_h5file, 'r')
-
-lats = f['gt2l']['freeboard_beam_segment']['beam_freeboard']['latitude'][:]
-lons = f['gt2l']['freeboard_beam_segment']['beam_freeboard']['longitude'][:]
-beam_fb_height = f['gt2l']['freeboard_beam_segment']['beam_freeboard']['beam_fb_height'][:]
-
-f.close()
-lon_mean = lons.mean()
-lat_mean = lats.mean()
 
 # Draw the map
-#m = Basemap(projection='cyl', llcrnrlat=-90, urcrnrlat=90, llcrnrlon=0, urcrnrlon=360, resolution='c')
-m = Basemap(projection='npaeqd', boundinglat=60, lon_0=180, resolution='c')
-x, y = m(lons, lats)
+m = Basemap(projection='cyl', llcrnrlat=-90, urcrnrlat=90, llcrnrlon=0, urcrnrlon=360, resolution='c')
+# m = Basemap(projection='npaeqd', boundinglat=60, lon_0=180, resolution='c')
+x, y = m(lon_array, lat_array)
 
 # Draw the scatterplot
-h = m.scatter(x, y, c=beam_fb_height, marker='.',linewidths=0.5, cmap=plt.cm.jet, alpha=0.8)
+h = m.scatter(x, y, c=swh_array, marker='.', linewidths=0.5, cmap=plt.cm.jet, alpha=0.8)
 m.colorbar(location='right')
-plt.cm.ScalarMappable.set_clim(h, vmin=0, vmax=0.3)
+plt.cm.ScalarMappable.set_clim(h, vmin=0, vmax=5)
 
 m.drawcoastlines()
 m.fillcontinents()

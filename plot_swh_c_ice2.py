@@ -28,12 +28,12 @@ for i in range(len(lon_array)):
     if lon_array[i] < 0:
         lon_array[i] += 360
 # Draw the map
-m = Basemap(projection='cyl', llcrnrlat=-90, urcrnrlat=90, llcrnrlon=0, urcrnrlon=360, resolution='c')
-#m = Basemap(projection='npaeqd', boundinglat=60, lon_0=180, resolution='c')
+#m = Basemap(projection='cyl', llcrnrlat=-90, urcrnrlat=90, llcrnrlon=0, urcrnrlon=360, resolution='c')
+m = Basemap(projection='npaeqd', boundinglat=60, lon_0=180, resolution='c')
 x, y = m(lons, lats)
 
 # Draw the scatterplot
-h = m.scatter(lon_array, lat_array, c=swh_array, marker='.', linewidths=0.5, cmap=plt.cm.jet)
+h = m.scatter(lon_array, lat_array, c=swh_array, marker='.', linewidths=0.1, cmap=plt.cm.jet)
 m.colorbar(location='right')
 plt.cm.ScalarMappable.set_clim(h, vmax=10)
 
