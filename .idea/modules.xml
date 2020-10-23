@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://F:/remote_sensing_data/CRYOSAT-2/.idea/CRYOSAT-2.iml" filepath="F:/remote_sensing_data/CRYOSAT-2/.idea/CRYOSAT-2.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/remote_sensing.iml" filepath="$PROJECT_DIR$/.idea/remote_sensing.iml" />
+      <module fileurl="file://G:/remote_sensing_data/.idea/remote_sensing_data.iml" filepath="G:/remote_sensing_data/.idea/remote_sensing_data.iml" />
     </modules>
   </component>
 </project>
