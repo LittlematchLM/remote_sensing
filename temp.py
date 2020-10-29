@@ -17,4 +17,6 @@ plt.show()
 a = np.array([np.nan, 1, 3, np.nan, np.nan, 0.6]).reshape(2, 3)
 b = np.array([np.nan, np.nan, 2.7, 0.7, 0.5, np.nan]).reshape(2, 3)
 
+c = np.isnan(a-b)
+hty = np.argwhere(c!=True)
 
