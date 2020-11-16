@@ -1,22 +1,32 @@
+import collections
 import numpy as np
-import matplotlib.pyplot as plt
+import pandas as pd
 
-'''x = np.arange(-5, 5, 1)
-y = np.arange(-5, 4, 1)
-xx, yy = np.meshgrid(x, y)
-z = np.sin(xx ** 2 + yy ** 2) / (xx ** 2 + yy ** 2)
-z[0, 0] = np.nan
-z[3, 1] = np.nan
-h = plt.pcolor(x, y, z)
 
-print(x.shape, y.shape,)
-print(xx.shape, yy.shape, z.shape)
-plt.show()
-'''
+hy_lat = np.array([1, 2, 2, 2, 2, 2, ])
+hy_lon = np.array([2, 1, 1, 2, 2, 2, ])
+hy_swh = np.array([0.5, 0.66, 1.3, 0.58, 0.6, 0.99, ])
+hy_time = np.array([6.17701975668108E8,
+                    6.17701976021226E8,
+                    6.17701977042735E8,
+                    6.17701981312124E8,
+                    6.17701982018682E8,
+                    6.17701983664886E8,
+                    ])
+hy_value_grid = np.full(fill_value=np.nan, shape=[3, 3])
+hy_time_grid = np.full(fill_value=np.nan, shape=[3, 3])
+hy_num_grip = np.zeros(shape=[3, 3])
 
-a = np.array([np.nan, 1, 3, np.nan, np.nan, 0.6]).reshape(2, 3)
-b = np.array([np.nan, np.nan, 2.7, 0.7, 0.5, np.nan]).reshape(2, 3)
-
-c = np.isnan(a-b)
-hty = np.argwhere(c!=True)
-
+time_dict = {}
+for i in range(len(hy_swh)):
+    x = hy_lat[i]
+    y = hy_lon[i]
+    if hy_num_grip[x][y] == 0:
+        hy_value_grid[x][y] = hy_swh[i]
+        hy_time_grid[x][y] = hy_time[i]
+        hy_num_grip[x][y] = 1
+        dict_name = str(x) + '+' + str(y)
+        time_dict[dict_name] = {hy_time_grid[x][y]: hy_value_grid[x][y]}
+    else:
+        dict_name = str(x) + '+' + str(y)
+        time_dict[dict_name][hy_time[i]] = hy_swh[i]

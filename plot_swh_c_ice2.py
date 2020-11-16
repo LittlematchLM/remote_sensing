@@ -10,26 +10,26 @@ from matplotlib import cm, colors
 fig = plt.figure(figsize=(16, 12))
 # read netCDF file
 
-dir_path = '.\H2B_nc_data\ICESAT2_ATL12_20200711'
-ncfiles = glob.glob(dir_path + '\*.h5')
+dir_path = r'.\H2B_nc_data\ICESAT2_ATL12_20200711\ATL12_20200701041604_00890801_003_01.h5'
+# ncfiles = glob.glob(dir_path + '\*.h5')
 lon_array = np.array([])
 lat_array = np.array([])
 swh_array = np.array([])
-for ncfile in ncfiles:
-    with h5py.File(ncfile, 'r') as f:
-        lats = f['gt2l']['ssh_segments']['latitude'][:]
-        lons = f['gt2l']['ssh_segments']['longitude'][:]
-        swh = f['gt2l']['ssh_segments']['heights']['swh'][:]
-    lon_array = np.append(lon_array, lons)
-    lat_array = np.append(lat_array, lats)
-    swh_array = np.append(swh_array, swh)
+#for ncfile in ncfiles:
+with h5py.File(dir_path, 'r') as f:
+    lats = f['gt3l']['ssh_segments']['latitude'][:]
+    lons = f['gt3l']['ssh_segments']['longitude'][:]
+    swh = f['gt3l']['ssh_segments']['heights']['swh'][:]
+lon_array = np.append(lon_array, lons)
+lat_array = np.append(lat_array, lats)
+swh_array = np.append(swh_array, swh)
 
 for i in range(len(lon_array)):
     if lon_array[i] < 0:
         lon_array[i] += 360
 # Draw the map
-#m = Basemap(projection='cyl', llcrnrlat=-90, urcrnrlat=90, llcrnrlon=0, urcrnrlon=360, resolution='c')
-m = Basemap(projection='npaeqd', boundinglat=60, lon_0=180, resolution='c')
+m = Basemap(projection='cyl', llcrnrlat=-90, urcrnrlat=90, llcrnrlon=0, urcrnrlon=360, resolution='c')
+# m = Basemap(projection='npaeqd', boundinglat=60, lon_0=180, resolution='c')
 x, y = m(lons, lats)
 
 # Draw the scatterplot
