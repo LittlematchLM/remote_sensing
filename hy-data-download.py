@@ -42,6 +42,9 @@ for data_ref in data_refs[num_file-1:]:
         current_file_num = get_file_num(files)
         if current_file_num == num_file:
             break
+        # driver.set_page_load_timeout(2)
         time.sleep(8)
+        
+
     num_file += 1
     print(num_file)
