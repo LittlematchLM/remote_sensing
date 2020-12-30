@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from astropy.time import Time
 hy_cy_coincident_list = np.array([['750+38', 619631968.508203, 1.37, 619632901.375125, 0.984],
  ['751+38', 619631969.516053, 1.252, 619632899.488252, 1.284],
  ['751+38', 619631969.516053, 1.252, 619632900.431687, 1.564],
@@ -17,44 +18,31 @@ hy_cy_coincident_list = np.array([['750+38', 619631968.508203, 1.37, 619632901.3
 time_win = 1800
 hy_cy_df = pd.DataFrame(hy_cy_coincident_list, columns=['ij', 'hy_time', 'hy_value', 'other_time', 'other_value'])
 
-hy_cy_df['hy_time_round'] = ((hy_cy_df['hy_time'].astype(np.float))/time_win).astype(np.int)
+def time_change(long_time):
+     year = 2000 + int(long_time/(60*60*24*365))
+     month = 0+ (long_time - (long_time/(60*60*24*365)))
+     day =
+     return year
 
-hy_cy_df['other_time_round'] = ((hy_cy_df['other_time'].astype(np.float))/time_win).astype(np.int)
-hy_cy_mean_df = hy_cy_df.groupby(['ij','hy_time_round','other_time_round']).mean()
+year = time_change(620503127)
 
-hy_cy_df
+from datetime import datetime
+import datetime
+import time
+strTime = '2000-01-01 00:00:00'
 
-#
-# c = pd.DataFrame(columns=['ij', 'hy_time', 'hy_value', 'other_time', 'other_value'])
-#
-# b = np.array([])
-# time1, time2, value1, value2, num_count = 0, 0, 0, 0, 0
-# for num in range(1,hy_cy_coincident_list.shape[0]):
-#
-#     if hy_cy_coincident_list[num-1][0] == hy_cy_coincident_list[num][0]:
-#
-#         if((float(hy_cy_coincident_list[num-1][1]) - float(hy_cy_coincident_list[num][1]))< time_win) and ((float(hy_cy_coincident_list[num-1][3]) - float(hy_cy_coincident_list[num][3]))< time_win):
-#             value1 += np.float(hy_cy_coincident_list[num-1][2])
-#             time1 +=  np.float(hy_cy_coincident_list[num-1][1])
-#             value2 += np.float(hy_cy_coincident_list[num-1][4])
-#             time2 += np.float(hy_cy_coincident_list[num-1][3])
-#             num_count += 1
-#             print(num_count)
-#             print(value1,time1,value2,time2)
-#         else:
-#             value1 += np.float(hy_cy_coincident_list[num-1][2])
-#             time1 +=  np.float(hy_cy_coincident_list[num-1][1])
-#             value2 += np.float(hy_cy_coincident_list[num-1][4])
-#             time2 += np.float(hy_cy_coincident_list[num-1][3])
-#             num_count += 1
-#             temp = np.array([hy_cy_coincident_list[num-1][0],time1/num_count,value1/num_count,time2/num_count,value2/num_count])
-#             print('该停止了')
-#             np.hstack(b,temp)
-#             time1, time2, value1, value2, num_count = 0, 0, 0, 0, 0
-#     else:
-#         print('下一个点')
-#         b = np.hstack((b,hy_cy_coincident_list[num-1]))
-#
-#
-# b = b.reshape(6,5)
+startTime = datetime.datetime.strptime(strTime, "%Y-%m-%d %H:%M:%S")  # 把strTime转化为时间格式,后面的秒位自动补位的
+print (startTime)
 
+startTime2 = (startTime + datetime.timedelta(seconds=620503128)).strftime("%Y-%m-%d %H:%M:%S")
+print (startTime2)
+
+startTime3 = (startTime + datetime.timedelta(seconds=620502125)).strftime("%Y-%m-%d %H:%M:%S")
+print (startTime3)
+
+
+listt = [620505128,620503333]
+a = lambda ltime: (datetime.datetime.strptime('2000-01-01 00:00:00', "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=ltime)).strftime("%Y-%m-%d %H:%M:%S")
+ll = map(a,listt)
+
+a=[('b',3),('a',2),('d',4),('c',1)]

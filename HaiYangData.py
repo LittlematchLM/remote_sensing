@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import cm, colors
 import glob
-from mpl_toolkits.basemap import Basemap
 from netCDF4 import Dataset
 import pandas as pd
 import gzip
@@ -75,6 +74,40 @@ class HaiYangData(RSData):
                 time_array = np.append(time_array, time)
         value_array = np.delete(value_array, 0, axis=0)
         return lon_array, lat_array, time_array, value_array
+
+    def is_atlas_from_nc(self,files_path, value):
+        # icesat2 的时间是从2018-01-01 00：00：00开始记的，Hy2b和cryosat2的是从2000-01-01 00：00：00开始计的
+        # 2018-01-01 00：00：00 与2000-01-01 00：00：00 相差了568080000秒
+        correction_second = 568080000
+
+        lon_array = np.array([])
+        lat_array = np.array([])
+        value_array = np.full((1, len(value)), fill_value=65530)
+        time_array = np.array([])
+        tracks = ['gt1l', 'gt1r', 'gt2l', 'gt2r', 'gt3l', 'gt3r']
+        for ncfile in files_path:
+            with h5py.File(ncfile, 'r') as f:
+                for track in tracks:
+                    try:
+                        lats = f[track]['ssh_segments']['latitude'][:]
+                        lons = f[track]['ssh_segments']['longitude'][:]
+                        # values = f[track]['ssh_segments']['heights'][value][:]
+                        time = f[track]['ssh_segments']['delta_time'][:]
+                        value_a_t = np.zeros((lons.shape[0], len(value)))
+
+                        for i, key in enumerate(value):
+                            values = f[track]['ssh_segments']['heights'][key][:]
+                            value_a_t[:, i] = values
+
+                        lon_array = np.append(lon_array, lons)
+                        lat_array = np.append(lat_array, lats)
+                        value_array = np.vstack((value_array, value_a_t))
+                        time_array = np.append(time_array, time + correction_second)
+                    except KeyError:
+                        print(ncfile, track)
+                        pass
+        value_array = np.delete(value_array, 0, axis=0)
+        return lon_array, lat_array, time_array,value_array
 
     def data_filter(self,data_frame,lat_type,min):
         ''':arg
