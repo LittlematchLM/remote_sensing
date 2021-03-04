@@ -19,6 +19,30 @@ class HaiYangData(RSData):
         self.resolution = resolution
         self.nlat,self.nlon  = self.get_nlat_nlon_npaeqd(self.resolution)
 
+    def hy_file_day_split(self, files):
+        '''
+        :files 文件列表
+        :returns 逐日分的hy文件列表
+        '''
+        files.sort()
+        file_list = []
+        list = []
+        for i in range(len(files)):
+
+            if i == 0:
+                list.append(files[i])
+                continue
+
+            if (files[i].split('\\')[-1].split('_')[-2].split('T')[0]) == (
+            files[i - 1].split('\\')[-1].split('_')[-2].split('T')[0]):
+                list.append(files[i])
+            else:
+                file_list.append(list)
+                list = []
+                list.append(files[i])
+        file_list.append(list)
+        return file_list
+
 
     def alt_from_nc_files(self, files, value):
         '''
@@ -66,8 +90,12 @@ class HaiYangData(RSData):
                 value_a_t = np.zeros((lons.shape[0], len(value)))
 
                 for i, key in enumerate(value):
-                    values = fh.variables[key][:]
-                    value_a_t[:, i] = values
+                    if key == 'height_1_20_ku' or key == 'height_2_20_ku' or key == 'height_3_20_ku':
+                        values = fh.variables[key][:]
+                        value_a_t[:, i] = values[::20]
+                    else:
+                        values = fh.variables[key][:]
+                        value_a_t[:, i] = values
                 lon_array = np.append(lon_array, lons)
                 lat_array = np.append(lat_array, lats)
                 value_array = np.vstack((value_array, value_a_t))
@@ -82,9 +110,12 @@ class HaiYangData(RSData):
 
         lon_array = np.array([])
         lat_array = np.array([])
+        light_array = np.array([])
         value_array = np.full((1, len(value)), fill_value=65530)
         time_array = np.array([])
         tracks = ['gt1l', 'gt1r', 'gt2l', 'gt2r', 'gt3l', 'gt3r']
+        surf_array = np.full((1,5),fill_value=65530)
+        
         for ncfile in files_path:
             with h5py.File(ncfile, 'r') as f:
                 for track in tracks:
@@ -93,12 +124,18 @@ class HaiYangData(RSData):
                         lons = f[track]['ssh_segments']['longitude'][:]
                         # values = f[track]['ssh_segments']['heights'][value][:]
                         time = f[track]['ssh_segments']['delta_time'][:]
+                        
+                        
                         value_a_t = np.zeros((lons.shape[0], len(value)))
+#                         surf_t = np.zeros((lons.shape[0], 5))
+                        surf_t = f[track]['ssh_segments']['stats']['surf_type_prcnt'][:]
+                        light = np.full(shape=(lons.shape[0],1),fill_value=track)
 
                         for i, key in enumerate(value):
                             values = f[track]['ssh_segments']['heights'][key][:]
                             value_a_t[:, i] = values
-
+                        surf_array = np.vstack((surf_array, surf_t))
+                        light_array = np.append(light_array, light)
                         lon_array = np.append(lon_array, lons)
                         lat_array = np.append(lat_array, lats)
                         value_array = np.vstack((value_array, value_a_t))
@@ -107,7 +144,8 @@ class HaiYangData(RSData):
                         print(ncfile, track)
                         pass
         value_array = np.delete(value_array, 0, axis=0)
-        return lon_array, lat_array, time_array,value_array
+        surf_array = np.delete(surf_array, 0, axis=0)
+        return lon_array, lat_array, time_array,surf_array,light_array,value_array
 
     def data_filter(self,data_frame,lat_type,min):
         ''':arg
@@ -124,6 +162,7 @@ class HaiYangData(RSData):
         zeros_grid = np.zeros((nlon, nlat))
         return zeros_grid
 
+    # 交叉点平均化
     def coincident_point_mean(self,dataframe,value):
         num_grid = self.get_zeros_grid(self.nlat, self.nlon)
         grid_array = self.get_nan_grid(self.nlat, self.nlon)
@@ -137,6 +176,38 @@ class HaiYangData(RSData):
                 grid_array[x][y] += dataframe[value][index]
                 num_grid[x][y] += 1
         grid_array = grid_array / num_grid
+        return grid_array
+
+    # 获取最大值
+    def coincident_point_max(self,dataframe,value):
+        num_grid = self.get_zeros_grid(self.nlat, self.nlon)
+        grid_array = self.get_nan_grid(self.nlat, self.nlon)
+        for index in dataframe.index:
+            x = int(dataframe.projlons[index] / self.resolution)
+            y = int(dataframe.projlats[index] / self.resolution)
+            if num_grid[x][y] == 0:
+                grid_array[x][y] = dataframe[value][index]
+                num_grid[x][y] += 1
+            else:
+                if dataframe[value][index] <= grid_array[x][y]:
+                    continue
+                else:grid_array[x][y] = dataframe[value][index]
+        return grid_array
+
+    # 获取最小值
+    def coincident_point_min(self,dataframe,value):
+        num_grid = self.get_zeros_grid(self.nlat, self.nlon)
+        grid_array = self.get_nan_grid(self.nlat, self.nlon)
+        for index in dataframe.index:
+            x = int(dataframe.projlons[index] / self.resolution)
+            y = int(dataframe.projlats[index] / self.resolution)
+            if num_grid[x][y] == 0:
+                grid_array[x][y] = dataframe[value][index]
+                num_grid[x][y] += 1
+            else:
+                if dataframe[value][index] >= grid_array[x][y]:
+                    continue
+                else:grid_array[x][y] = dataframe[value][index]
         return grid_array
 
     # 获取数组的长和宽
@@ -250,4 +321,28 @@ class HaiYangData(RSData):
                 time_dict[dict_name][dataframe.time[index]] = dataframe[value][index]
                 num_grid[x][y] += 1
         return time_dict
+    
+    def coincident_time_log_test(self,dataframe,value):
+        time_dict = {}
+        # value_grid存储原始值
+        # time_grid存储原始时间
+        # 当有两个点在一个格子的时候，用else里面的语句
 
+        time_grid = self.get_nan_grid(self.nlat, self.nlon)
+        num_grid = self.get_zeros_grid(self.nlat, self.nlon)
+        value_grid = self.get_nan_grid(self.nlat, self.nlon)
+        x = ((dataframe.projlons) / self.resolution).astype(np.int)
+        y = ((dataframe.projlats) / self.resolution).astype(np.int)
+        for index in dataframe.index:
+            if num_grid[x][y] == 0:
+                value_grid[x][y] = dataframe[value][index]
+                time_grid[x][y] = dataframe['time'][index]
+                dict_name = str(x) + '+' + str(y)
+                time_dict[dict_name] = {time_grid[x][y]: value_grid[x][y]}
+                num_grid[x][y] = 1
+
+            else:
+                dict_name = str(x) + '+' + str(y)
+                time_dict[dict_name][dataframe.time[index]] = dataframe[value][index]
+                num_grid[x][y] += 1
+        return time_dict
